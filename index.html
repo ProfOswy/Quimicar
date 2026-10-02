@@ -1,0 +1,868 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Quimicar: modelo de Bohr dos 118 elementos e ligações químicas iônica, covalente e metálica passo a passo. Prof. Me. Rodrigo Gonçalves (Prof Oswy).">
+<title>Quimicar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Kalam:wght@700&display=swap">
+<style>
+:root{
+  --bg:#F3F5F7; --surface:#FFFFFF; --ink:#15202B; --muted:#5E6B78; --line:#DDE3E8;
+  --accent:#0E6E8E; --proton:#C4453A; --neutron:#7E8B98; --orbit:#C3CDD6;
+  --am:#E4572E; --ate:#F0A22E; --mt:#4C86D9; --op:#7E97A6; --sm:#16A596;
+  --nm:#4FAE45; --hal:#9B5FD3; --gn:#DB4C9A; --lan:#C9935A; --act:#8E6A4E;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  --hand:"Kalam","Comic Sans MS",cursive;
+}
+:root{color-scheme:light}
+:root.escuro{
+  color-scheme:dark;
+  --bg:#0D1318; --surface:#151E27; --ink:#E4EAF0; --muted:#93A0AD; --line:#27333E;
+  --accent:#4DB8D8; --proton:#E86A5E; --neutron:#8795A3; --orbit:#34424F;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;margin:0}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:22px 40px;display:flex;flex-direction:column;gap:24px}
+h1,h2,h3{text-wrap:balance;margin:0}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 12px;cursor:pointer;line-height:1.2}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+
+header{display:flex;flex-direction:column;gap:8px}
+header{position:relative}
+.tema{position:absolute;top:0;right:0;font-size:.82rem;padding:6px 11px}
+@media (max-width:520px){.tema{position:static;align-self:flex-start;order:3}}
+header .ttl{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+header .by{font-size:.85rem;line-height:1.5}
+header .by b{color:var(--ink);font-weight:600}
+header .by a{color:var(--accent)}
+header h1{font-family:var(--hand);font-weight:700;font-size:2.2rem;line-height:1;color:var(--accent)}
+header p{margin:0;color:var(--muted)}
+
+/* tela 1: escolha */
+.lead{font-size:1.1rem;font-weight:600}
+.pt-wrap{overflow-x:auto;padding-bottom:4px}
+.pt{display:grid;grid-template-columns:repeat(18,minmax(30px,1fr));gap:4px;min-width:600px}
+.el{border:1.5px solid var(--cat);background:color-mix(in srgb,var(--cat) 34%,var(--surface));border-radius:6px;padding:3px 0;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05;aspect-ratio:1/1.05;transition:transform .12s,background .12s}
+.el .n{font-family:var(--mono);font-size:.56rem;color:var(--muted)}
+.el .s{font-weight:600;font-size:.9rem}
+.el:hover{background:var(--cat);color:#fff;transform:translateY(-2px)}
+.el:hover .n{color:#fff}
+:root.escuro .el .n{color:var(--ink);opacity:.75}
+.ph{font-family:var(--mono);font-size:.56rem;color:var(--muted);display:flex;align-items:center;justify-content:center;border:1px dashed var(--line);border-radius:6px}
+.gap{grid-column:1/-1;height:6px}
+.cats{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.8rem;color:var(--muted);margin-top:12px}
+.cats i{display:inline-block;width:12px;height:12px;border-radius:3px;border:1.5px solid var(--c);background:color-mix(in srgb,var(--c) 34%,var(--surface))!important;margin-right:5px;vertical-align:-1px}
+
+.basics{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.b{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.b h3{font-size:.98rem}
+.b p{margin:0;font-size:.9rem;color:var(--muted)}
+.b .eq{font-family:var(--mono);font-size:.88rem;color:var(--ink)}
+
+/* tela 2: átomo */
+.bar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.nav{display:flex;gap:6px}
+.atom{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(260px,1fr);gap:24px;align-items:start}
+@media (max-width:820px){.atom{grid-template-columns:1fr}}
+.stage{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px;position:relative}
+.stage svg{width:100%;max-width:560px;aspect-ratio:1;margin:0 auto;display:block}
+.stage .btn{position:absolute;top:12px;right:12px;font-size:.82rem;padding:5px 10px}
+.legend{position:absolute;top:16px;left:16px;display:flex;flex-direction:column;gap:2px;font-size:.8rem;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+
+.side{display:flex;flex-direction:column;gap:16px}
+.id{display:flex;gap:14px;align-items:center}
+.tile{flex:none;width:92px;height:96px;border-radius:10px;padding:7px 9px;display:flex;flex-direction:column;justify-content:space-between;border:2px solid var(--cat);background:color-mix(in srgb,var(--cat) 30%,var(--surface))}
+.tile .z{font-family:var(--mono);font-size:.82rem}
+.tile .s{font-size:2.3rem;font-weight:700;line-height:1}
+.tile .m{font-family:var(--mono);font-size:.72rem;color:var(--muted)}
+.id h2{font-size:1.7rem;line-height:1.1}
+.id span{font-size:.85rem;color:var(--muted)}
+
+.sum{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.row{display:grid;grid-template-columns:1fr auto;align-items:center;column-gap:10px;padding:11px 16px;border-bottom:1px solid var(--line)}
+.row small{grid-column:1/-1;font-size:.8rem;color:var(--muted);line-height:1.4;margin-top:2px}
+.row:last-child{border-bottom:0}
+.row .l{display:flex;align-items:center;gap:10px}
+.row .l i{width:12px;height:12px;border-radius:50%;flex:none}
+.row b{font-family:var(--mono);font-size:1.5rem;font-weight:500;font-variant-numeric:tabular-nums}
+.shl{display:flex;flex-wrap:wrap;gap:6px;padding:0 16px 14px;margin-top:-4px}
+.shl span{font-family:var(--mono);font-size:.82rem;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:2px 8px}
+.shl span em{font-style:normal;color:var(--muted);margin-right:4px}
+.about p{margin:0;font-size:.93rem}
+.about .t{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;margin-bottom:2px}
+.about{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px 28px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.more{display:flex;flex-direction:column;gap:14px}
+.tabs{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:12px;align-items:start}
+@media (max-width:420px){.tabs{grid-template-columns:1fr}}
+footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
+footer p{margin:0}
+footer a{color:var(--accent)}
+.mtabs{display:flex;gap:4px;border-bottom:1px solid var(--line)}
+.mtab{background:none;border:0;border-bottom:3px solid transparent;padding:10px 14px;font-weight:600;color:var(--muted);cursor:pointer;margin-bottom:-1px}
+.mtab[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
+.mtab:hover{color:var(--ink)}
+#modEl,#modLig{display:flex;flex-direction:column;gap:24px}
+#modEl[hidden],#modLig[hidden]{display:none}
+.lig{display:grid;grid-template-columns:minmax(260px,330px) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:820px){.lig{grid-template-columns:1fr}}
+.lpick{display:flex;flex-direction:column;gap:14px}
+.lsel{display:flex;flex-direction:column;gap:8px;align-items:stretch}
+.lsel .btn{align-self:center}
+.lbox{display:flex;flex-direction:column;gap:4px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--c);border-radius:10px;padding:8px 12px}
+.lbox span{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.lbox select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 8px;width:100%}
+.lex{display:flex;flex-direction:column;gap:6px}
+.lex>span{font-size:.8rem;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip-b{font:inherit;font-family:var(--mono);font-size:.8rem;background:var(--surface);border:1px solid var(--line);border-radius:99px;padding:4px 10px;cursor:pointer;color:var(--ink)}
+.chip-b:hover{border-color:var(--accent);color:var(--accent)}
+.rules{display:flex;flex-direction:column;gap:6px}
+.rules div{display:grid;grid-template-columns:auto 1fr;gap:0 10px;padding:8px 12px;border-radius:10px;background:color-mix(in srgb,var(--c) 9%,var(--surface));border:1px solid color-mix(in srgb,var(--c) 30%,var(--surface))}
+.rules b{color:var(--c);font-size:.9rem}
+.rules span{font-size:.85rem;text-align:right}
+.rules small{grid-column:1/-1;color:var(--muted);font-size:.78rem}
+.lres{display:flex;flex-direction:column;gap:12px}
+.lhead{display:flex;flex-direction:column;gap:4px}
+.lhead h2{font-size:1.5rem}
+.ltype{font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;font-weight:700;color:var(--c)}
+.lsteps{display:flex;flex-direction:column;gap:10px}
+.lstep{display:grid;grid-template-columns:32px 1fr;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;animation:fin .25s ease}
+.lstep[hidden]{display:none}
+.lstep>p{grid-column:1/-1;margin:0}
+.sn{width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--surface);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:500;font-size:.9rem}
+.sb{display:flex;flex-direction:column;gap:8px;min-width:0}
+.sb h3{font-size:1rem}
+.sb p{margin:0;font-size:.92rem}
+.sb .cap{font-size:.8rem;color:var(--muted)}
+.sb .big{font-family:var(--mono);font-size:2rem;font-weight:500;line-height:1.1}
+.sb .eqn{font-family:var(--mono);background:var(--bg);border-radius:8px;padding:8px 10px;overflow-x:auto;white-space:nowrap}
+.ldraw{width:100%;max-width:380px;display:block}
+.lnav{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lnav span{font-size:.85rem;color:var(--muted);margin-right:auto;order:-1;width:100%}
+.btn.pri{background:var(--accent);color:var(--surface);border-color:var(--accent)}
+.btn.pri:hover{color:var(--surface);filter:brightness(1.1)}
+@keyframes fin{from{opacity:.4;transform:translateY(4px)}to{opacity:1;transform:none}}
+.sea{animation:sea 3.2s ease-in-out infinite alternate}
+@keyframes sea{0%{transform:translate(0,0)}50%{transform:translate(5px,-4px)}100%{transform:translate(-4px,5px)}}
+@media (prefers-reduced-motion:reduce){.sea,.lstep{animation:none}}
+.term{border-bottom:1.5px dotted var(--accent);cursor:help;text-decoration:none}
+.term:focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-radius:2px}
+#tip{position:fixed;z-index:50;max-width:280px;background:var(--ink);color:var(--bg);font-size:.84rem;font-weight:400;line-height:1.45;padding:10px 12px;border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,.18);pointer-events:none}
+#tip b{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;opacity:.75}
+
+.tab{background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.tab summary{cursor:pointer;padding:12px 16px;font-weight:600;font-size:.93rem;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.tab summary::-webkit-details-marker{display:none}
+.tab summary::after{content:"+";font-family:var(--mono);font-size:1.1rem;color:var(--accent)}
+.tab[open] summary::after{content:"−"}
+.tab[open] summary{border-bottom:1px solid var(--line)}
+.tb{padding:12px 16px 16px;display:flex;flex-direction:column;gap:10px;font-size:.9rem}
+.tb p{margin:0}
+.tb svg{width:100%;max-width:400px;display:block;margin:0 auto}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px}
+.kv dt{color:var(--muted);font-size:.8rem}
+.kv dd{margin:0;font-family:var(--mono);font-size:.86rem;overflow-wrap:anywhere}
+.note{font-size:.82rem;color:var(--muted);background:var(--bg);border-radius:8px;padding:8px 10px}
+.bond{border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:4px}
+.bond .h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.bond .ty{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;font-weight:600;color:var(--c)}
+.bond .f{font-family:var(--mono);font-size:1.05rem;font-weight:500}
+.bond p{color:var(--muted);font-size:.86rem}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <button class="btn tema" id="tema" aria-pressed="false">Modo escuro</button>
+    <div class="ttl"><h1>Quimicar</h1><p>O átomo por dentro, elemento por elemento.</p></div>
+    <p class="by">Criado por: <b>Prof. Me. Rodrigo Gonçalves (Prof Oswy)</b><br><a href="https://www.youtube.com/@ProfOswy" target="_blank" rel="noopener">youtube.com/@ProfOswy</a></p>
+  </header>
+
+  <nav class="mtabs" role="tablist">
+    <button class="mtab" role="tab" data-m="el" aria-selected="true">Elementos químicos</button>
+    <button class="mtab" role="tab" data-m="lig" aria-selected="false">Ligações químicas</button>
+  </nav>
+
+  <div id="modEl">
+
+  <main id="pick">
+    <div style="display:flex;flex-direction:column;gap:24px">
+      <section>
+        <p class="lead" style="margin:0 0 10px">Escolha um elemento</p>
+        <div class="pt-wrap"><div class="pt" id="pt"></div></div>
+        <div class="cats" id="cats"></div>
+      </section>
+      <section class="basics">
+        <div class="b"><h3>Átomo</h3><p>Núcleo com prótons (+) e nêutrons (sem carga). Em volta, os elétrons (−) na eletrosfera.</p></div>
+        <div class="b"><h3>Número atômico (Z)</h3><p>Quantidade de prótons. Define o elemento e sua posição na tabela. No átomo neutro, elétrons = prótons.</p></div>
+        <div class="b"><h3>Número de massa (A)</h3><p>Prótons + nêutrons.</p><span class="eq">A = Z + N</span></div>
+        <div class="b"><h3>Camadas</h3><p>Os elétrons ficam em camadas K, L, M, N, O, P, Q. O período da tabela indica quantas camadas o átomo tem.</p></div>
+      </section>
+    </div>
+  </main>
+
+  <main id="view" hidden>
+    <div style="display:flex;flex-direction:column;gap:18px">
+      <div class="bar">
+        <button class="btn" id="back">← Tabela periódica</button>
+        <div class="nav">
+          <button class="btn" id="prev" aria-label="Elemento anterior">←</button>
+          <button class="btn" id="next" aria-label="Próximo elemento">→</button>
+        </div>
+      </div>
+      <div class="atom">
+        <div class="stage">
+          <div class="legend">
+            <span><i style="background:var(--proton)"></i>próton</span>
+            <span><i style="background:var(--neutron)"></i>nêutron</span>
+            <span><i style="background:var(--accent)"></i>elétron</span>
+          </div>
+          <button class="btn" id="play" aria-pressed="true">Pausar</button>
+          <svg id="bohr" viewBox="0 0 500 500" role="img" aria-label="Modelo de Bohr do elemento"></svg>
+        </div>
+        <aside class="side">
+          <div class="id">
+            <div class="tile" id="tile"><span class="z" id="tZ"></span><span class="s" id="tS"></span><span class="m" id="tM"></span></div>
+            <div><h2 id="nome"></h2><span id="cat"></span></div>
+          </div>
+          <div class="sum">
+            <div class="row"><span class="l"><i style="background:var(--proton)"></i>Prótons</span><b id="cP"></b><small id="cPx"></small></div>
+            <div class="row"><span class="l"><i style="background:var(--neutron)"></i>Nêutrons</span><b id="cN"></b><small id="cNx"></small></div>
+            <div class="row"><span class="l"><i style="background:var(--accent)"></i>Elétrons</span><b id="cE"></b><small id="cEx"></small></div>
+            <div class="row" style="border-bottom:0"><span class="l"><i style="background:transparent;border:2px solid var(--orbit)"></i>Camadas</span><b id="cC"></b></div>
+            <div class="shl" id="shl"></div>
+          </div>
+        </aside>
+      </div>
+      <section class="more">
+        <div class="about">
+            <div><div class="t">Onde aparece</div><p id="onde"></p></div>
+            <div><div class="t">Para que serve</div><p id="usos"></p></div>
+          </div>
+        <div class="tabs">
+            <details class="tab" id="tabVal"><summary><span><span class="term" tabindex="0" data-tip="val">Camada de valência</span> · diagrama de Linus Pauling</span></summary><div class="tb" id="val"></div></details>
+            <details class="tab" id="tabLig"><summary>Ligações químicas</summary><div class="tb" id="lig"></div></details>
+          </div>
+      </section>
+    </div>
+  </main>
+
+  </div>
+
+  <div id="modLig" hidden>
+    <div class="lig">
+      <section class="lpick">
+        <p class="lead" style="margin:0">Escolha dois elementos</p>
+        <div class="lsel">
+          <label class="lbox" style="--c:var(--am)"><span>Elemento 1</span><select id="selA"></select></label>
+          <button class="btn" id="ligSwap" aria-label="Trocar elementos">⇄</button>
+          <label class="lbox" style="--c:var(--mt)"><span>Elemento 2</span><select id="selB"></select></label>
+        </div>
+        <div class="lex"><span>Exemplos:</span><div id="ligEx" class="chips"></div></div>
+        <div class="rules">
+          <div style="--c:var(--proton)"><b>Iônica</b><span>metal + não metal</span><small>um doa elétrons, o outro recebe</small></div>
+          <div style="--c:var(--accent)"><b>Covalente</b><span>não metal + não metal</span><small>compartilham pares de elétrons</small></div>
+          <div style="--c:var(--ate)"><b>Metálica</b><span>metal + metal</span><small>mar de elétrons livres</small></div>
+        </div>
+      </section>
+      <section class="lres">
+        <div class="lhead"><span class="ltype" id="ligType"></span><h2 id="ligPair"></h2></div>
+        <div id="ligSteps" class="lsteps"></div>
+        <div class="lnav" id="ligNav">
+          <button class="btn" id="ligPrev">← Voltar</button>
+          <span id="ligCount"></span>
+          <button class="btn pri" id="ligNext">Próximo passo →</button>
+          <button class="btn" id="ligAll">Mostrar tudo</button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <footer><p>Nêutrons do <span class="term" tabindex="0" data-tip="iso">isótopo</span> mais comum (ou mais estável, nos radioativos).</p></footer>
+</div>
+
+<div id="tip" role="tooltip" hidden></div>
+<script>
+const E=[
+["H","Hidrogênio","1,008",1,"nm","Elemento mais abundante do universo: forma a maior parte das estrelas. Na Terra, está na água (H₂O) e em todas as moléculas orgânicas.","Produção de amônia e fertilizantes, refino de petróleo, células a combustível e combustível de foguetes."],
+["He","Hélio","4,0026",4,"gn","Segundo elemento mais abundante do universo. Na Terra, é extraído de reservas de gás natural.","Balões e dirigíveis, resfriamento dos ímãs de aparelhos de ressonância magnética, misturas de gás para mergulho profundo."],
+["Li","Lítio","6,94",7,"am","Salmouras dos salares andinos (Chile, Argentina, Bolívia) e minerais como o espodumênio; o Brasil tem jazidas no Vale do Jequitinhonha (MG).","Baterias de celulares e carros elétricos, medicamentos estabilizadores de humor, graxas e vidros especiais."],
+["Be","Berílio","9,0122",9,"ate","Minerais como o berilo; a esmeralda e a água-marinha são variedades de berilo.","Ligas cobre-berílio para molas e ferramentas que não soltam faísca, janelas de tubos de raios X, espelhos de telescópios espaciais."],
+["B","Boro","10,81",11,"sm","Minerais como o bórax, encontrados em lagos secos de regiões áridas.","Vidro borossilicato (travessas que vão ao forno), fibra de vidro, fertilizantes e barras de controle de reatores nucleares."],
+["C","Carbono","12,011",12,"nm","Base de toda a vida. Está no CO₂ do ar, no calcário, no carvão, no petróleo, no grafite e no diamante.","Aço (liga de ferro e carbono), combustíveis, plásticos, grafite de lápis, fibra de carbono e datação por carbono-14."],
+["N","Nitrogênio","14,007",14,"nm","Forma 78% do ar atmosférico e está nas proteínas e no DNA.","Fertilizantes (amônia e ureia), nitrogênio líquido para congelamento, atmosfera inerte em embalagens de alimentos."],
+["O","Oxigênio","15,999",16,"nm","21% do ar e elemento mais abundante da crosta terrestre, presente nas rochas e na água.","Respiração e uso hospitalar, siderurgia, soldagem oxiacetilênica, tratamento de água e esgoto."],
+["F","Flúor","18,998",19,"hal","Minerais como a fluorita (CaF₂).","Cremes dentais e água de abastecimento (fluoreto), teflon, gases refrigerantes, enriquecimento de urânio."],
+["Ne","Neônio","20,180",20,"gn","Traços no ar atmosférico (cerca de 0,0018%).","Letreiros luminosos vermelho-alaranjados, lasers de hélio-neônio, criogenia."],
+["Na","Sódio","22,990",23,"am","Sal marinho (NaCl) e minerais como os feldspatos. É tão reativo que não existe livre na natureza.","Sal de cozinha, soda cáustica, bicarbonato de sódio, lâmpadas amarelas de iluminação pública."],
+["Mg","Magnésio","24,305",24,"ate","Água do mar, dolomita e magnesita. Fica no centro da molécula de clorofila das plantas.","Ligas leves para rodas e peças automotivas, fogos de artifício, antiácidos (leite de magnésia), refratários."],
+["Al","Alumínio","26,982",27,"op","Metal mais abundante da crosta terrestre; extraído da bauxita, da qual o Brasil é grande produtor.","Esquadrias, latas de bebida, estruturas de aviões, cabos de linhas de transmissão, panelas."],
+["Si","Silício","28,085",28,"sm","Segundo elemento mais abundante da crosta: está na areia (sílica, SiO₂), no quartzo e nas argilas.","Chips e semicondutores, painéis solares, vidro, cimento, cerâmicas e silicones."],
+["P","Fósforo","30,974",31,"nm","Rochas fosfáticas (apatita). Está nos ossos, nos dentes, no DNA e no ATP.","Fertilizantes, palitos de fósforo, detergentes, aditivos alimentares."],
+["S","Enxofre","32,06",32,"nm","Regiões vulcânicas, gás natural e petróleo; faz parte de algumas proteínas.","Ácido sulfúrico (o produto químico industrial mais fabricado), vulcanização da borracha, fertilizantes."],
+["Cl","Cloro","35,45",35,"hal","Sal marinho (NaCl) e água do mar.","Tratamento de água de abastecimento e piscinas, PVC, alvejantes e desinfetantes."],
+["Ar","Argônio","39,95",40,"gn","Quase 1% do ar atmosférico.","Gás de proteção em soldagem MIG/TIG, lâmpadas incandescentes, vidros duplos isolantes."],
+["K","Potássio","39,098",39,"am","Minerais como a silvita; presente na banana, no feijão e nas células do corpo.","Fertilizantes (o K do NPK), sabões, vidros especiais; regula nervos e músculos no organismo."],
+["Ca","Cálcio","40,078",40,"ate","Calcário, mármore e gesso; ossos, dentes e cascas de ovo.","Cimento e cal na construção civil, correção da acidez do solo (calagem), gesso, suplementos."],
+["Sc","Escândio","44,956",45,"mt","Disperso em minerais raros, como a thortveitita.","Ligas alumínio-escândio para quadros de bicicleta e aeronaves, lâmpadas de alta intensidade."],
+["Ti","Titânio","47,867",48,"mt","Minerais como rutilo e ilmenita, em areias pesadas.","Implantes dentários e próteses, aeronaves, pigmento branco (TiO₂) em tintas e protetores solares."],
+["V","Vanádio","50,942",51,"mt","Minerais como a vanadinita e alguns tipos de petróleo.","Aço-vanádio para ferramentas e molas, catalisadores, baterias de fluxo."],
+["Cr","Cromo","51,996",52,"mt","Mineral cromita.","Aço inoxidável, cromagem de peças, pigmentos, curtimento de couro."],
+["Mn","Manganês","54,938",55,"mt","Minerais como a pirolusita; o Brasil tem grandes jazidas no Pará e em Minas Gerais.","Produção de aço, pilhas alcalinas, ligas de alumínio de latas."],
+["Fe","Ferro","55,845",56,"mt","Hematita e magnetita (Carajás e Quadrilátero Ferrífero). Forma o núcleo da Terra e está na hemoglobina do sangue.","Aço para estruturas, vergalhões, máquinas e veículos; transporta oxigênio no sangue."],
+["Co","Cobalto","58,933",59,"mt","Minerais associados ao níquel e ao cobre; faz parte da vitamina B12.","Baterias de íon-lítio, superligas de turbinas, ímãs, pigmento azul-cobalto."],
+["Ni","Níquel","58,693",58,"mt","Minérios lateríticos e sulfetados; o núcleo da Terra é uma liga de ferro e níquel.","Aço inoxidável, moedas, baterias, niquelação de peças."],
+["Cu","Cobre","63,546",63,"mt","Minerais como a calcopirita; às vezes aparece puro (nativo).","Fios e cabos elétricos, tubulações de água quente e gás, latão e bronze, motores elétricos."],
+["Zn","Zinco","65,38",64,"mt","Mineral esfalerita (blenda).","Galvanização do aço contra a corrosão, latão, pilhas, pomadas de óxido de zinco."],
+["Ga","Gálio","69,723",69,"op","Subproduto do processamento da bauxita e do zinco.","LEDs e semicondutores (GaN, GaAs), painéis solares. Derrete na mão: funde a 29,8 °C."],
+["Ge","Germânio","72,630",74,"sm","Subproduto do zinco e do carvão.","Fibras ópticas, lentes para câmeras de infravermelho, semicondutores."],
+["As","Arsênio","74,922",75,"sm","Minerais como a arsenopirita; contaminante natural de algumas águas subterrâneas.","Semicondutores (GaAs) e preservação de madeira. É muito tóxico."],
+["Se","Selênio","78,971",80,"nm","Associado a minérios de cobre. A castanha-do-pará é rica em selênio.","Vidros, células fotoelétricas, xampus anticaspa; nutriente essencial em pequenas doses."],
+["Br","Bromo","79,904",79,"hal","Água do mar e salmouras, como as do Mar Morto.","Retardantes de chama, tratamento de água, medicamentos. É um dos dois elementos líquidos à temperatura ambiente."],
+["Kr","Criptônio","83,798",84,"gn","Traços no ar atmosférico.","Lâmpadas de alto desempenho, flashes fotográficos, isolamento de janelas."],
+["Rb","Rubídio","85,468",85,"am","Disperso em minerais como a lepidolita.","Relógios atômicos, pesquisa científica, cor violeta em fogos de artifício."],
+["Sr","Estrôncio","87,62",88,"ate","Minerais celestita e estroncianita.","Cor vermelha em fogos e sinalizadores, ímãs de ferrite, cremes dentais para sensibilidade."],
+["Y","Ítrio","88,906",89,"mt","Terras-raras, em areias monazíticas.","LEDs brancos e telas, supercondutores, lasers (Nd:YAG), cerâmicas."],
+["Zr","Zircônio","91,224",90,"mt","Mineral zircão, comum em areias de praia.","Revestimento do combustível nuclear, próteses dentárias de zircônia, cerâmicas refratárias."],
+["Nb","Nióbio","92,906",93,"mt","Mineral pirocloro. O Brasil (Araxá, MG) responde por mais de 90% da produção mundial.","Aços de alta resistência para pontes, dutos e carros; ímãs supercondutores de ressonância magnética."],
+["Mo","Molibdênio","95,95",98,"mt","Mineral molibdenita.","Aços de alta resistência e ferramentas, lubrificantes, catalisadores; micronutriente para plantas."],
+["Tc","Tecnécio","[98]",98,"mt","Praticamente não existe na natureza: é produzido em reatores. Foi o primeiro elemento obtido artificialmente.","Medicina nuclear: o tecnécio-99m é usado em cintilografias."],
+["Ru","Rutênio","101,07",102,"mt","Minérios de platina.","Contatos elétricos, discos rígidos, catalisadores."],
+["Rh","Ródio","102,91",103,"mt","Minérios de platina e níquel; um dos metais mais raros.","Catalisadores automotivos, banho de ródio em joias, espelhos."],
+["Pd","Paládio","106,42",106,"mt","Minérios de platina e níquel.","Catalisadores automotivos, eletrônicos, odontologia, joalheria."],
+["Ag","Prata","107,87",107,"mt","Aparece nativa ou em minérios de chumbo, cobre e zinco.","Joias e talheres, contatos elétricos, espelhos, curativos antibacterianos."],
+["Cd","Cádmio","112,41",114,"mt","Subproduto da produção de zinco.","Baterias Ni-Cd, pigmentos amarelos e laranja, revestimentos. É tóxico."],
+["In","Índio","114,82",115,"op","Subproduto da produção de zinco.","Telas touch e LCD (óxido de índio-estanho, ITO), soldas especiais."],
+["Sn","Estanho","118,71",120,"op","Mineral cassiterita; o Brasil produz estanho na Amazônia.","Soldas de eletrônicos, folha de flandres (latas), bronze."],
+["Sb","Antimônio","121,76",121,"sm","Mineral estibinita.","Retardantes de chama, baterias chumbo-ácido, ligas metálicas."],
+["Te","Telúrio","127,60",130,"sm","Subproduto do refino do cobre.","Painéis solares de filme fino (CdTe), ligas metálicas, borracha."],
+["I","Iodo","126,90",127,"hal","Algas marinhas, água do mar e salitre do Chile.","Sal iodado, antissépticos, contrastes de exames de imagem; essencial para a tireoide."],
+["Xe","Xenônio","131,29",132,"gn","Traços no ar atmosférico.","Faróis automotivos de xenônio, propulsão iônica de satélites, anestesia."],
+["Cs","Césio","132,91",133,"am","Mineral polucita.","Relógios atômicos (definem o segundo), perfuração de poços de petróleo. O césio-137 foi o material do acidente de Goiânia, em 1987."],
+["Ba","Bário","137,33",138,"ate","Minerais barita e witherita.","Contraste de raios X (sulfato de bário), lama de perfuração de poços, cor verde em fogos de artifício."],
+["La","Lantânio","138,91",139,"lan","Terras-raras, em minerais como monazita e bastnasita.","Lentes de câmeras, baterias NiMH de carros híbridos, catalisadores de refino de petróleo."],
+["Ce","Cério","140,12",140,"lan","Terra-rara mais abundante; monazita e bastnasita.","Polimento de vidros, catalisadores automotivos, pedra de isqueiro (ferrocério)."],
+["Pr","Praseodímio","140,91",141,"lan","Terras-raras.","Ímãs permanentes, vidros de proteção para soldadores, ligas de aeronaves."],
+["Nd","Neodímio","144,24",142,"lan","Terras-raras.","Ímãs de neodímio (motores elétricos, fones de ouvido, turbinas eólicas), lasers."],
+["Pm","Promécio","[145]",145,"lan","Quase inexistente na natureza; produzido em reatores.","Baterias nucleares, tintas luminosas, pesquisa."],
+["Sm","Samário","150,36",152,"lan","Terras-raras.","Ímãs samário-cobalto, tratamento de câncer ósseo, controle de reatores."],
+["Eu","Európio","151,96",153,"lan","Terras-raras.","Cor vermelha de telas, tinta de segurança das cédulas de euro, lâmpadas fluorescentes."],
+["Gd","Gadolínio","157,25",158,"lan","Terras-raras.","Contraste de ressonância magnética, barras de controle de reatores."],
+["Tb","Térbio","158,93",159,"lan","Terras-raras.","Cor verde de telas e lâmpadas, ligas magnetostritivas (Terfenol-D)."],
+["Dy","Disprósio","162,50",164,"lan","Terras-raras.","Aditivo dos ímãs de neodímio de carros elétricos, lâmpadas de alta intensidade."],
+["Ho","Hólmio","164,93",165,"lan","Terras-raras.","Lasers cirúrgicos (urologia), ímãs de campo muito intenso."],
+["Er","Érbio","167,26",166,"lan","Terras-raras.","Amplificadores de fibra óptica, lasers dermatológicos, vidros cor-de-rosa."],
+["Tm","Túlio","168,93",169,"lan","Terras-raras; uma das menos abundantes.","Aparelhos portáteis de raios X, lasers."],
+["Yb","Itérbio","173,05",174,"lan","Terras-raras.","Relógios atômicos de altíssima precisão, lasers, ligas de aço."],
+["Lu","Lutécio","174,97",175,"lan","Terras-raras.","Detectores de PET, tratamento de câncer (lutécio-177), catalisadores."],
+["Hf","Háfnio","178,49",180,"mt","Sempre junto ao zircônio, no mineral zircão.","Barras de controle de reatores, isolantes em chips, superligas."],
+["Ta","Tântalo","180,95",181,"mt","Mineral coltan (columbita-tantalita).","Capacitores de celulares, implantes cirúrgicos, turbinas."],
+["W","Tungstênio","183,84",184,"mt","Minerais volframita e scheelita.","Filamentos de lâmpadas, ferramentas de corte de metal duro, eletrodos de solda TIG. Tem o maior ponto de fusão entre os metais."],
+["Re","Rênio","186,21",187,"mt","Subproduto do molibdênio; muito raro.","Superligas de turbinas de avião, catalisadores para gasolina."],
+["Os","Ósmio","190,23",192,"mt","Minérios de platina.","Pontas de canetas-tinteiro, contatos elétricos. É o elemento mais denso."],
+["Ir","Irídio","192,22",193,"mt","Minérios de platina. Uma camada de argila rica em irídio marca o impacto do asteroide que extinguiu os dinossauros.","Velas de ignição, cadinhos, radioterapia."],
+["Pt","Platina","195,08",195,"mt","Aparece nativa ou em minérios de níquel e cobre.","Catalisadores automotivos, joias, eletrodos, quimioterápicos (cisplatina)."],
+["Au","Ouro","196,97",197,"mt","Nativo, em veios de quartzo e em aluviões de rios (garimpos).","Reserva de valor, joias, contatos de eletrônicos, odontologia."],
+["Hg","Mercúrio","200,59",202,"mt","Mineral cinábrio.","Lâmpadas fluorescentes, termômetros antigos, amálgama. Líquido e tóxico; é poluente associado a garimpos."],
+["Tl","Tálio","204,38",205,"op","Subproduto de minérios de zinco e chumbo.","Cintilografia cardíaca, eletrônicos. Muito tóxico."],
+["Pb","Chumbo","207,2",208,"op","Mineral galena.","Baterias de carro, proteção contra radiação, lastros. Tóxico: foi banido de tintas e da gasolina."],
+["Bi","Bismuto","208,98",209,"op","Subproduto do refino de chumbo e cobre.","Remédios para o estômago, soldas sem chumbo, cosméticos."],
+["Po","Polônio","[209]",209,"op","Traços em minérios de urânio.","Eliminadores de eletricidade estática na indústria, fontes de nêutrons. Descoberto por Marie Curie."],
+["At","Astato","[210]",210,"hal","Extremamente raro; surge no decaimento do urânio.","Pesquisa em radioterapia contra o câncer."],
+["Rn","Radônio","[222]",222,"gn","Gás que escapa do solo e de rochas graníticas, formado pelo decaimento do urânio.","Pouco uso prático; seu acúmulo em porões e subsolos é monitorado por risco à saúde."],
+["Fr","Frâncio","[223]",223,"am","Extremamente raro, em minérios de urânio.","Apenas pesquisa científica."],
+["Ra","Rádio","[226]",226,"ate","Minérios de urânio.","Antes usado em tintas luminosas de relógios; hoje em radioterapia (rádio-223)."],
+["Ac","Actínio","[227]",227,"act","Traços em minérios de urânio.","Radioterapia experimental (actínio-225), fontes de nêutrons."],
+["Th","Tório","232,04",232,"act","Areias monazíticas, inclusive no litoral do Espírito Santo e da Bahia.","Combustível nuclear em estudo, camisas de lampião, ligas de magnésio."],
+["Pa","Protactínio","231,04",231,"act","Traços em minérios de urânio.","Apenas pesquisa científica."],
+["U","Urânio","238,03",238,"act","Minerais como a uraninita; o Brasil tem reservas em Caetité (BA) e Santa Quitéria (CE).","Combustível de usinas nucleares (Angra 1 e 2), blindagens."],
+["Np","Netúnio","[237]",237,"act","Traços em minérios de urânio; produzido em reatores.","Detectores de nêutrons, produção de plutônio-238."],
+["Pu","Plutônio","[244]",244,"act","Produzido em reatores a partir do urânio.","Combustível nuclear (MOX), baterias de sondas espaciais (plutônio-238)."],
+["Am","Amerício","[243]",243,"act","Sintético, produzido em reatores.","Detectores de fumaça (amerício-241)."],
+["Cm","Cúrio","[247]",247,"act","Sintético.","Fonte de partículas alfa em espectrômetros de sondas espaciais."],
+["Bk","Berquélio","[247]",247,"act","Sintético.","Pesquisa; alvo para produzir elementos mais pesados."],
+["Cf","Califórnio","[251]",251,"act","Sintético.","Fonte de nêutrons para partida de reatores e prospecção de petróleo e ouro."],
+["Es","Einstênio","[252]",252,"act","Identificado em 1952 nos resíduos do primeiro teste de bomba de hidrogênio.","Apenas pesquisa científica."],
+["Fm","Férmio","[257]",257,"act","Identificado nos mesmos resíduos que o einstênio.","Apenas pesquisa científica."],
+["Md","Mendelévio","[258]",258,"act","Sintético, produzido em aceleradores de partículas.","Apenas pesquisa. O nome homenageia Mendeleev, criador da tabela periódica."],
+["No","Nobélio","[259]",259,"act","Sintético, produzido em aceleradores de partículas.","Apenas pesquisa. O nome homenageia Alfred Nobel."],
+["Lr","Laurêncio","[266]",266,"act","Sintético, produzido em aceleradores de partículas.","Apenas pesquisa científica."],
+["Rf","Rutherfórdio","[267]",267,"mt"],["Db","Dúbnio","[268]",268,"mt"],["Sg","Seabórgio","[269]",269,"mt"],
+["Bh","Bóhrio","[270]",270,"mt"],["Hs","Hássio","[277]",277,"mt"],["Mt","Meitnério","[278]",278,"mt"],
+["Ds","Darmstádtio","[281]",281,"mt"],["Rg","Roentgênio","[282]",282,"mt"],["Cn","Copernício","[285]",285,"mt"],
+["Nh","Nihônio","[286]",286,"op"],["Fl","Fleróvio","[289]",289,"op"],["Mc","Moscóvio","[290]",290,"op"],
+["Lv","Livermório","[293]",293,"op"],["Ts","Tenesso","[294]",294,"hal"],["Og","Oganessônio","[294]",294,"gn"]
+];
+const SUPER_ONDE="Sintético: só existe em laboratório, produzido em aceleradores de partículas, e dura frações de segundo.";
+const SUPER_USO="Nenhum uso prático; serve à pesquisa sobre os limites da tabela periódica. Propriedades apenas previstas.";
+
+
+// ---------- distribuição (Pauling) ----------
+const SUP={"0":"⁰","1":"¹","2":"²","3":"³","4":"⁴","5":"⁵","6":"⁶","7":"⁷","8":"⁸","9":"⁹","+":"⁺","-":"⁻"};
+const sup=s=>String(s).split("").map(c=>SUP[c]||c).join("");
+function aufOcc(z){const o={};let left=z;for(const s of ORD){const c=Math.min(CAP[s[1]],left);o[s]=c;left-=c;}return o;}
+function realOcc(z){const o=aufOcc(z),x=EXC[z];if(x)for(const k in x)o[k]+=x[k];return o;}
+const fmt=(o,list)=>list.filter(s=>o[s]>0).map(s=>s+sup(o[s])).join(" ");
+
+function paulingSVG(o,valN,lastS){
+  const rows={1:"s",2:"sp",3:"spd",4:"spdf",5:"spdf",6:"spd",7:"sp"},L="spdf";
+  const x0=40,cw=64,ch=28,gx=10,gy=10,W=x0+4*(cw+gx),H=8+7*(ch+gy);
+  const cx=(n,l)=>x0+l*(cw+gx)+cw/2, cy=n=>8+(n-1)*(ch+gy)+ch/2;
+  let h='<svg viewBox="0 0 '+W+' '+(H+4)+'" role="img" aria-label="Diagrama de Linus Pauling"><defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--proton)" fill-opacity=".7"/></marker></defs>';
+  let lines='';
+  // diagonais (ordem de energia n+l)
+  for(let k=1;k<=8;k++){
+    const cells=[];for(let n=1;n<=7;n++)for(let l=0;l<rows[n].length;l++)if(n+l===k)cells.push([n,l]);
+    if(!cells.length)continue;cells.sort((a,b)=>b[1]-a[1]);
+    const dx=-(cw+gx),dy=ch+gy,a=cells[0],b=cells[cells.length-1];
+    const x1=cx(a[0],a[1])-0.55*dx,y1=cy(a[0])-0.55*dy,x2=cx(b[0],b[1])+0.5*dx,y2=cy(b[0])+0.5*dy;
+    lines+='<line x1="'+x1.toFixed(1)+'" y1="'+y1.toFixed(1)+'" x2="'+x2.toFixed(1)+'" y2="'+y2.toFixed(1)+'" stroke="var(--proton)" stroke-opacity=".5" stroke-width="1.3" marker-end="url(#ar)"/>';
+  }
+  for(let n=1;n<=7;n++){
+    const isV=n===valN;
+    h+='<text x="14" y="'+(cy(n)+4)+'" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" font-weight="'+(isV?700:500)+'" fill="'+(isV?"var(--accent)":"var(--muted)")+'">'+SHELL[n-1]+'</text>';
+    for(let l=0;l<rows[n].length;l++){
+      const s=n+L[l],c=o[s]||0,cap=CAP[L[l]],x=cx(n,l)-cw/2,y=cy(n)-ch/2,isLast=s===lastS;
+      const fo=c===0?0.9:(c===cap?1:1),fill=c===0?"var(--surface)":"color-mix(in srgb,var(--accent) "+(c===cap?30:14)+"%,var(--surface))";
+      const stroke=isLast?"var(--ate)":(isV&&c>0?"var(--accent)":"var(--line)"),sw=isLast||(isV&&c>0)?2:1;
+      h+='<rect x="'+x+'" y="'+y+'" width="'+cw+'" height="'+ch+'" rx="6" style="fill:'+fill+'" fill-opacity="'+fo+'" stroke="'+stroke+'" stroke-width="'+sw+'"/>';
+      h+='<text x="'+cx(n,l)+'" y="'+(cy(n)+5)+'" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13" font-weight="500" fill="'+(c?"var(--ink)":"var(--muted)")+'" fill-opacity="'+(c?1:.55)+'">'+s+(c?sup(c):"")+'</text>';
+    }
+  }
+  return h+lines+'</svg>';
+}
+
+function valenceHTML(z,e){
+  const o=aufOcc(z),filled=ORD.filter(s=>o[s]>0),lastS=filled[filled.length-1];
+  const valN=Math.max(...filled.map(s=>+s[0])),vs=filled.filter(s=>+s[0]===valN);
+  const ve=vs.reduce((t,s)=>t+o[s],0);
+  const byShell=[];for(const s of filled){byShell[+s[0]-1]=(byShell[+s[0]-1]||0)+o[s];}
+  let h='<p>Siga as setas: os elétrons ocupam os subníveis na ordem de energia indicada pelas diagonais.</p>';
+  h+=paulingSVG(o,valN,lastS);
+  h+='<dl class="kv"><dt>Ordem de energia</dt><dd>'+fmt(o,ORD)+'</dd>';
+  h+='<dt>Por camada</dt><dd>'+byShell.map((c,i)=>SHELL[i]+' '+c).join(" · ")+'</dd>';
+  h+='<dt><span class="term" tabindex="0" data-tip="val">Camada de valência</span></dt><dd>'+SHELL[valN-1]+' (n = '+valN+') → '+fmt(o,vs)+' = '+ve+' elétron'+(ve>1?'s':'')+'</dd>';
+  h+='<dt>Mais energético</dt><dd>'+lastS+sup(o[lastS])+'</dd></dl>';
+  h+='<p class="note">Borda azul: <span class="term" tabindex="0" data-tip="val">camada de valência</span> (a mais externa). Borda amarela: subnível mais energético, o último a ser preenchido.</p>';
+  if(EXC[z]){const r=realOcc(z),ks=ORD.filter(s=>s in EXC[z]).sort((a,b)=>a[0]-b[0]);
+    h+='<p class="note"><b>Exceção:</b> o diagrama prevê '+ks.map(s=>s+sup(o[s])).join(" ")+', mas no '+e[1].toLowerCase()+' real é '+ks.filter(s=>r[s]>0).map(s=>s+sup(r[s])).join(" ")+(ks.some(s=>r[s]===0)?' (o '+ks.filter(s=>r[s]===0).join(", ")+' fica vazio)':'')+'. Subníveis cheios ou semicheios são mais estáveis. O esquema de Bohr acima usa a distribuição real.</p>';}
+  if(z>103)h+='<p class="note">Acima do Z = 103, a distribuição é apenas prevista.</p>';
+  return h;
+}
+
+// ---------- ligações ----------
+const BT={cov:["Covalente","var(--accent)"],ion:["Iônica","var(--proton)"],met:["Metálica","var(--ate)"],none:["Quase nenhuma","var(--muted)"]};
+const BOND={
+H:[["cov","H₂O","Compartilha seu único elétron com o oxigênio: cada H fica com 2 elétrons, como o hélio."],["cov","H₂","Dois hidrogênios compartilham um par de elétrons."]],
+Be:[["cov","BeCl₂","Apesar de ser metal, o berílio tende a compartilhar elétrons em vez de doá-los."]],
+B:[["cov","BF₃","Compartilha seus 3 elétrons de valência com o flúor e fica com só 6 (exceção ao octeto)."]],
+C:[["cov","CH₄","Faz 4 ligações simples com o hidrogênio e completa o octeto. É o gás metano."],["cov","CO₂","Faz duas ligações duplas com o oxigênio."]],
+N:[["cov","NH₃","Compartilha 3 pares com o hidrogênio. É a amônia."],["cov","N₂","Ligação tripla entre dois N; por isso o nitrogênio do ar reage tão pouco."]],
+O:[["cov","H₂O","Compartilha 2 pares com o hidrogênio e completa o octeto."],["ion","MgO","Recebe 2 elétrons do magnésio e vira O²⁻."]],
+F:[["cov","HF","Compartilha 1 par com o hidrogênio."],["ion","CaF₂","Cada flúor recebe 1 elétron do cálcio (F⁻). É a fluorita."]],
+Cl:[["ion","NaCl","Recebe 1 elétron do sódio e vira Cl⁻. É o sal de cozinha."],["cov","HCl","Compartilha 1 par com o hidrogênio. Em água, forma o ácido clorídrico."]],
+Br:[["ion","KBr","Recebe 1 elétron do potássio e vira Br⁻."],["cov","Br₂","Dois bromos compartilham um par de elétrons."]],
+I:[["ion","KI","Recebe 1 elétron do potássio (I⁻). O iodeto de potássio é usado no sal iodado."],["cov","I₂","Dois iodos compartilham um par de elétrons."]],
+S:[["cov","H₂S","Compartilha 2 pares com o hidrogênio. É o gás com cheiro de ovo podre."],["ion","ZnS","Recebe 2 elétrons do zinco (S²⁻). É o mineral esfalerita."]],
+P:[["cov","PCl₃","Compartilha 3 pares com o cloro."]],
+Se:[["cov","H₂Se","Compartilha 2 pares com o hidrogênio, como o oxigênio na água."]],
+Si:[["cov","SiO₂","Cada silício faz 4 ligações com oxigênios formando uma rede. É o quartzo e a areia."]],
+Ge:[["cov","GeO₂","Rede covalente parecida com a do quartzo."]],
+As:[["cov","AsH₃","Compartilha 3 pares com o hidrogênio. É a arsina, gás muito tóxico."]],
+Sb:[["cov","SbCl₃","Compartilha 3 pares com o cloro."]],
+Te:[["cov","H₂Te","Compartilha 2 pares com o hidrogênio."]],
+Na:[["ion","NaCl","Perde 1 elétron (Na⁺) para o cloro (Cl⁻). É o sal de cozinha."]],
+Mg:[["ion","MgO","Perde 2 elétrons (Mg²⁺) para o oxigênio (O²⁻)."]],
+Ca:[["ion","CaO","Perde 2 elétrons (Ca²⁺) para o oxigênio (O²⁻). É a cal virgem da construção civil."]],
+Al:[["ion","Al₂O₃","Cada alumínio perde 3 elétrons (Al³⁺) e cada oxigênio recebe 2 (O²⁻). É a alumina, extraída da bauxita."]],
+Ti:[["ion","TiO₂","Ti⁴⁺ e O²⁻. É o pigmento branco das tintas."]],
+Cr:[["ion","Cr₂O₃","Cr³⁺ e O²⁻. É um pigmento verde."]],
+Mn:[["ion","MnO₂","Mn⁴⁺ e O²⁻. Vai dentro das pilhas."]],
+Fe:[["ion","Fe₂O₃","Cada ferro perde 3 elétrons (Fe³⁺) para o oxigênio (O²⁻). É a ferrugem e o minério hematita."]],
+Co:[["ion","CoCl₂","Co²⁺ e Cl⁻."]],
+Ni:[["ion","NiO","Ni²⁺ e O²⁻."]],
+Cu:[["ion","CuO","Cu²⁺ e O²⁻. O cobre escurece ao oxidar."]],
+Zn:[["ion","ZnO","Zn²⁺ e O²⁻. É o óxido de zinco das pomadas."]],
+Ag:[["ion","AgCl","Ag⁺ e Cl⁻. Escurece com a luz; foi a base da fotografia em filme."]],
+Sn:[["ion","SnO₂","Sn⁴⁺ e O²⁻. É o minério cassiterita."]],
+Hg:[["ion","HgS","Hg²⁺ e S²⁻. É o minério cinábrio."]],
+Pb:[["ion","PbS","Pb²⁺ e S²⁻. É o minério galena."]],
+Ce:[["ion","CeO₂","Ce⁴⁺ e O²⁻. Usado no polimento de vidros."]],
+Th:[["ion","ThO₂","Th⁴⁺ e O²⁻."]],U:[["ion","UO₂","U⁴⁺ e O²⁻. É a forma do combustível das usinas nucleares."]],Pu:[["ion","PuO₂","Pu⁴⁺ e O²⁻."]],
+Xe:[["cov","XeF₄","Exceção: com o flúor, o xenônio chega a compartilhar elétrons."]],
+Kr:[["cov","KrF₂","Exceção rara: só com o flúor, e o composto é instável."]]
+};
+const METAL=new Set(["am","ate","mt","op","lan","act"]);
+function bondHTML(z,e){
+  const sym=e[0],cat=e[4],nome=e[1],sh=shellsOf(z),v=sh[sh.length-1];
+  let list=(BOND[sym]||[]).slice(),intro;
+  if(cat==="gn"){intro="Com a <span class=\"term\" tabindex=\"0\" data-tip=\"val\">camada de valência</span> completa ("+(z===2?"2":"8")+" elétrons), é estável e quase não faz ligações.";list.unshift(["none",sym,"Existe como átomos isolados, sem se ligar a outros."]);}
+  else if(METAL.has(cat)){
+    intro="Metal: tende a perder elétrons de valência e virar cátion.";
+    if(!list.some(b=>b[0]==="ion")&&sym!=="Be"){
+      if(cat==="am")list.push(["ion",sym+"Cl","Perde 1 elétron ("+sym+"⁺) para o cloro (Cl⁻)."]);
+      else if(cat==="ate")list.push(["ion",sym+"Cl₂","Perde 2 elétrons ("+sym+"²⁺), um para cada cloro (Cl⁻)."]);
+      else if(cat==="lan")list.push(["ion",sym+"₂O₃",sym+"³⁺ e O²⁻. Os lantanídeos costumam perder 3 elétrons."]);
+      else list.push(["ion","óxidos e sais","Perde elétrons das camadas mais externas e forma cátions, que se unem a ânions como O²⁻ e Cl⁻."]);
+    }
+    list.unshift(["met",sym+" (sólido)","Os átomos soltam elétrons de valência, que circulam livres entre os cátions (mar de elétrons). Por isso o metal conduz eletricidade e calor."]);
+  }else if(cat==="sm")intro="Semimetal: costuma compartilhar elétrons (ligação covalente).";
+  else intro="Não metal: tende a receber ou compartilhar elétrons para completar o octeto.";
+  if(!list.length)list.push(["cov","—","Tende a compartilhar elétrons com outros não metais."]);
+  let h='<p>'+intro+' Tem '+v+' elétron'+(v>1?'s':'')+' na <span class="term" tabindex="0" data-tip="val">camada de valência</span> ('+SHELL[sh.length-1]+').</p>';
+  h+=list.map(b=>'<div class="bond" style="--c:'+BT[b[0]][1]+'"><div class="h"><span class="ty">'+BT[b[0]][0]+'</span><span class="f">'+b[1]+'</span></div><p>'+b[2]+'</p></div>').join("");
+  if(z>103)h+='<p class="note">Química apenas prevista: os átomos duram frações de segundo.</p>';
+  h+='<p class="note"><b>Iônica:</b> metal doa elétrons para não metal. <b>Covalente:</b> não metais compartilham pares de elétrons. <b>Metálica:</b> metais compartilham um mar de elétrons livres.</p>';
+  return h;
+}
+
+// ---------- caixinhas explicativas ----------
+const TIPS={
+ iso:["Isótopo","Átomos do mesmo elemento (mesmo número de prótons) com quantidades diferentes de nêutrons. Têm a mesma química, mas massas diferentes. Ex.: carbono-12 e carbono-14."],
+ val:["Camada de valência","É a camada mais externa da eletrosfera que tem elétrons. Os elétrons dela são os que participam das ligações químicas."]
+};
+(function(){
+  const tip=document.getElementById("tip");let cur=null;
+  function show(el){const d=TIPS[el.dataset.tip];if(!d)return;cur=el;
+    tip.innerHTML="<b>"+d[0]+"</b>"+d[1];tip.hidden=false;
+    const r=el.getBoundingClientRect(),w=tip.offsetWidth,hh=tip.offsetHeight,vw=document.documentElement.clientWidth;
+    let left=Math.min(Math.max(8,r.left+r.width/2-w/2),vw-w-8),top=r.top-hh-8;
+    if(top<8)top=r.bottom+8;tip.style.left=left+"px";tip.style.top=top+"px";}
+  function hide(){tip.hidden=true;cur=null;}
+  document.addEventListener("mouseover",e=>{const el=e.target.closest(".term");if(el)show(el);});
+  document.addEventListener("mouseout",e=>{const el=e.target.closest(".term");if(el&&!el.contains(e.relatedTarget))hide();});
+  document.addEventListener("focusin",e=>{const el=e.target.closest(".term");if(el)show(el);});
+  document.addEventListener("focusout",e=>{if(e.target.closest(".term"))hide();});
+  document.addEventListener("click",e=>{const el=e.target.closest(".term");if(el){e.preventDefault();e.stopPropagation();cur===el&&!tip.hidden?hide():show(el);}else hide();},true);
+  window.addEventListener("scroll",hide,{passive:true});
+})();
+
+const CAT={am:"Metal alcalino",ate:"Metal alcalino-terroso",mt:"Metal de transição",op:"Outro metal",sm:"Semimetal",nm:"Não metal",hal:"Halogênio",gn:"Gás nobre",lan:"Lantanídeo",act:"Actinídeo"};
+const SHELL="KLMNOPQ";
+const ORD=["1s","2s","2p","3s","3p","4s","3d","4p","5s","4d","5p","6s","4f","5d","6p","7s","5f","6d","7p"];
+const CAP={s:2,p:6,d:10,f:14};
+const EXC={24:{"4s":-1,"3d":1},29:{"4s":-1,"3d":1},41:{"5s":-1,"4d":1},42:{"5s":-1,"4d":1},44:{"5s":-1,"4d":1},45:{"5s":-1,"4d":1},46:{"5s":-2,"4d":2},47:{"5s":-1,"4d":1},57:{"4f":-1,"5d":1},58:{"4f":-1,"5d":1},64:{"4f":-1,"5d":1},78:{"6s":-1,"5d":1},79:{"6s":-1,"5d":1},89:{"5f":-1,"6d":1},90:{"5f":-2,"6d":2},91:{"5f":-1,"6d":1},92:{"5f":-1,"6d":1},93:{"5f":-1,"6d":1},96:{"5f":-1,"6d":1},103:{"6d":-1,"7p":1}};
+const DOTS_MAX=36; // acima disso, o núcleo mostra números
+const $=id=>document.getElementById(id);
+
+function shellsOf(z){
+  const o={};let left=z;
+  for(const s of ORD){const c=Math.min(CAP[s[1]],left);o[s]=c;left-=c;}
+  const x=EXC[z];if(x)for(const k in x)o[k]+=x[k];
+  const a=[0,0,0,0,0,0,0];
+  for(const s of ORD)a[+s[0]-1]+=o[s];
+  while(a.length&&a[a.length-1]===0)a.pop();
+  return a;
+}
+function place(z){
+  if(z>=57&&z<=71)return{r:9,c:z-57+3};
+  if(z>=89&&z<=103)return{r:10,c:z-89+3};
+  const P=[[1,1,2],[2,3,10],[3,11,18],[4,19,36],[5,37,54],[6,55,86],[7,87,118]];
+  const [p,st]=P.find(x=>z>=x[1]&&z<=x[2]);const i=z-st;
+  if(p===1)return{r:1,c:z===1?1:18};
+  if(p<=3)return{r:p,c:i<2?i+1:i+11};
+  if(p<=5||i<2)return{r:p,c:i+1};
+  return{r:p,c:z-(p===6?72:104)+4};
+}
+
+const st={z:1,run:!matchMedia("(prefers-reduced-motion: reduce)").matches};
+
+(function build(){
+  const pt=$("pt");
+  for(let z=1;z<=118;z++){
+    const e=E[z-1],p=place(z),b=document.createElement("button");
+    b.className="el";b.style.setProperty("--cat","var(--"+e[4]+")");
+    b.style.gridRow=p.r;b.style.gridColumn=p.c;
+    b.innerHTML='<span class="n">'+z+'</span><span class="s">'+e[0]+'</span>';
+    b.title=z+" · "+e[1];b.setAttribute("aria-label",e[1]+", número atômico "+z);
+    b.onclick=()=>openEl(z);pt.appendChild(b);
+  }
+  [[6,"57–71"],[7,"89–103"]].forEach(([r,t])=>{const d=document.createElement("div");d.className="ph";d.style.gridRow=r;d.style.gridColumn=3;d.textContent=t;pt.appendChild(d);});
+  const g=document.createElement("div");g.className="gap";g.style.gridRow=8;pt.appendChild(g);
+  $("cats").innerHTML=Object.entries(CAT).map(([k,v])=>'<span><i style="--c:var(--'+k+')"></i>'+v+'</span>').join("");
+})();
+
+function openEl(z){st.z=Math.max(1,Math.min(118,z));$("pick").hidden=true;$("view").hidden=false;render();window.scrollTo({top:0});}
+function closeEl(){$("view").hidden=true;$("pick").hidden=false;}
+$("back").onclick=closeEl;
+$("prev").onclick=()=>openEl(st.z-1);$("next").onclick=()=>openEl(st.z+1);
+$("play").onclick=()=>{st.run=!st.run;syncPlay();};
+function syncPlay(){$("play").textContent=st.run?"Pausar":"Girar";$("play").setAttribute("aria-pressed",st.run);}
+document.addEventListener("keydown",ev=>{if($("view").hidden||$("modEl").hidden||ev.target.closest("select"))return;
+  if(ev.key==="ArrowLeft")openEl(st.z-1);else if(ev.key==="ArrowRight")openEl(st.z+1);else if(ev.key==="Escape")close();});
+
+function rng(seed){return()=>{seed=(seed*1664525+1013904223)%4294967296;return seed/4294967296;};}
+
+let groups=[];
+function drawBohr(Z,N,sh){
+  const C=250,total=Z+N,dots=total<=DOTS_MAX;
+  const rN=dots?16+3.2*Math.sqrt(total):48;
+  const n=sh.length,outer=236,step=(outer-rN-18)/n;
+  const R=i=>rN+18+step*(i+0.5)+step*0.2;
+  let h='<circle cx="'+C+'" cy="'+C+'" r="'+(rN+4)+'" fill="var(--bg)" stroke="var(--line)"/>';
+  if(dots){
+    const r=rng(Z*131+N*7),kinds=[];
+    for(let i=0;i<Z;i++)kinds.push("proton");for(let i=0;i<N;i++)kinds.push("neutron");
+    for(let i=kinds.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[kinds[i],kinds[j]]=[kinds[j],kinds[i]];}
+    const dr=Math.min(8,rN*0.86/Math.sqrt(total)),ga=Math.PI*(3-Math.sqrt(5));
+    kinds.forEach((k,i)=>{const rr=(rN-dr*0.6)*Math.sqrt((i+0.5)/total),a=i*ga;
+      h+='<circle cx="'+(C+rr*Math.cos(a)).toFixed(2)+'" cy="'+(C+rr*Math.sin(a)).toFixed(2)+'" r="'+dr.toFixed(2)+'" fill="var(--'+k+')"/>';});
+  }else{
+    const f='font-family="IBM Plex Mono, monospace" text-anchor="middle" font-weight="500"';
+    h+='<text x="'+C+'" y="'+(C-4)+'" '+f+' font-size="19" fill="var(--proton)">'+Z+' p⁺</text>';
+    h+='<line x1="'+(C-28)+'" y1="'+C+'" x2="'+(C+28)+'" y2="'+C+'" stroke="var(--line)"/>';
+    h+='<text x="'+C+'" y="'+(C+20)+'" '+f+' font-size="19" fill="var(--neutron)">'+N+' n⁰</text>';
+  }
+  sh.forEach((c,i)=>{const r=R(i),y=C-r;
+    h+='<circle cx="'+C+'" cy="'+C+'" r="'+r.toFixed(1)+'" fill="none" stroke="var(--orbit)" stroke-width="1.2"/>';
+    h+='<rect x="'+(C-8)+'" y="'+(y-8).toFixed(1)+'" width="16" height="16" rx="4" fill="var(--surface)" stroke="var(--orbit)"/><text x="'+C+'" y="'+(y+4).toFixed(1)+'" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="500" fill="var(--muted)">'+SHELL[i]+'</text>';});
+  sh.forEach((c,i)=>{const r=R(i),er=c>24?4:5.5;
+    h+='<g class="shell" data-i="'+i+'">';
+    for(let k=0;k<c;k++){const a=2*Math.PI*k/c+0.3+i*0.5;
+      h+='<circle cx="'+(C+r*Math.cos(a)).toFixed(2)+'" cy="'+(C+r*Math.sin(a)).toFixed(2)+'" r="'+er+'" fill="var(--accent)" stroke="var(--surface)" stroke-width="1.2"/>';}
+    h+='</g>';});
+  $("bohr").innerHTML=h;groups=[...$("bohr").querySelectorAll("g.shell")];
+}
+let ang=0,last=0;
+function tick(t){
+  if(st.run&&last&&groups.length){ang+=(t-last)*0.018;
+    groups.forEach(g=>{const i=+g.dataset.i;g.setAttribute("transform","rotate("+(ang/(1+i*0.55)).toFixed(2)+" 250 250)");});}
+  last=t;requestAnimationFrame(tick);
+}
+
+function render(){
+  const z=st.z,e=E[z-1],N=e[3]-z,A=e[3],sh=shellsOf(z),cat="var(--"+e[4]+")",v=sh[sh.length-1];
+  $("prev").disabled=z===1;$("next").disabled=z===118;
+  $("tile").style.setProperty("--cat",cat);
+  $("tZ").textContent=z;$("tS").textContent=e[0];$("tM").textContent=e[2];
+  $("nome").textContent=e[1];$("cat").textContent=CAT[e[4]];
+  $("cP").textContent=z;$("cN").textContent=N;$("cE").textContent=z;$("cC").textContent=sh.length;
+  $("cPx").textContent="Definem o elemento: todo átomo com "+z+" próton"+(z>1?"s":"")+" é "+e[1].toLowerCase()+".";
+  $("cEx").innerHTML="Fazem as ligações químicas, principalmente o"+(v>1?"s "+v:" único")+" da <span class=\"term\" tabindex=\"0\" data-tip=\"val\">camada de valência</span> ("+SHELL[sh.length-1]+").";
+  $("cNx").innerHTML="Definem o <span class=\"term\" tabindex=\"0\" data-tip=\"iso\">isótopo</span> ("+e[1]+"-"+A+"). Com "+(N+1)+" nêutrons seria o "+e[1]+"-"+(A+1)+". Mudam a massa, não a química.";
+  $("val").innerHTML=valenceHTML(z,e);$("lig").innerHTML=bondHTML(z,e);
+  $("shl").innerHTML=sh.map((c,i)=>'<span><em>'+SHELL[i]+'</em>'+c+'</span>').join("");
+  $("onde").textContent=e[5]||SUPER_ONDE;$("usos").textContent=e[6]||SUPER_USO;
+  $("bohr").setAttribute("aria-label","Modelo de Bohr do "+e[1]+": "+z+" prótons, "+N+" nêutrons, camadas "+sh.join(", "));
+  drawBohr(z,N,sh);
+}
+syncPlay();requestAnimationFrame(tick);
+
+// ================= LIGAÇÕES QUÍMICAS =================
+const ORDER_F=["B","Si","Ge","C","Sb","As","P","N","H","Te","Se","S","At","I","Br","Cl","O","F"];
+const SUBS={"0":"₀","1":"₁","2":"₂","3":"₃","4":"₄","5":"₅","6":"₆","7":"₇","8":"₈","9":"₉"};
+const sub=n=>n>1?String(n).split("").map(c=>SUBS[c]).join(""):"";
+const ROM=["","I","II","III","IV","V","VI","VII"];
+const gcd=(a,b)=>b?gcd(b,a%b):a;
+const ANION={H:"hidreto",C:"carbeto",N:"nitreto",O:"óxido",F:"fluoreto",P:"fosfeto",S:"sulfeto",Cl:"cloreto",Se:"seleneto",Br:"brometo",I:"iodeto",At:"astateto"};
+const CHG={Al:3,Ga:3,In:3,Tl:1,Sn:2,Pb:2,Bi:3,Po:2,Sc:3,Ti:4,V:3,Cr:3,Mn:2,Fe:3,Co:2,Ni:2,Cu:2,Zn:2,Y:3,Zr:4,Nb:5,Mo:6,Tc:7,Ru:3,Rh:3,Pd:2,Ag:1,Cd:2,Hf:4,Ta:5,W:6,Re:7,Os:4,Ir:3,Pt:2,Au:3,Hg:2,Ac:3,Th:4,Pa:5,U:4,Np:4,Pu:4};
+const FIXED=new Set(["Sc","Zn","Y","Ag","Cd","Al","Ga","In","Bi","Ac"]);
+const NOTE_ION={NaCl:"o sal de cozinha",CaO:"a cal virgem da construção civil",Al2O3:"a alumina, extraída da bauxita",Fe2O3:"a ferrugem e o minério hematita",KI:"usado no sal iodado",CaF2:"o mineral fluorita",NaF:"usado em cremes dentais",MgO:"usado em refratários",ZnO:"usado em pomadas",ZnS:"o mineral esfalerita",KCl:"usado em fertilizantes",Li3N:"um dos poucos nitretos que se formam à temperatura ambiente",NaH:"um hidreto iônico: aqui o hidrogênio vira ânion H⁻",CuO:"o pó preto que escurece o cobre",PbS:"o minério galena",HgS:"o minério cinábrio",Ag2S:"a mancha escura da prata",TiO2:"o pigmento branco das tintas",CaCl2:"usado para secar ambientes (antimofo)",MgCl2:"presente na água do mar"};
+const NAME_COV={H2O:"água",CO2:"gás carbônico",CH4:"metano",NH3:"amônia",HCl:"cloreto de hidrogênio",HF:"fluoreto de hidrogênio",HBr:"brometo de hidrogênio",HI:"iodeto de hidrogênio",H2:"gás hidrogênio",O2:"gás oxigênio",N2:"gás nitrogênio",Cl2:"gás cloro",F2:"gás flúor",Br2:"bromo",I2:"iodo",H2S:"sulfeto de hidrogênio (cheiro de ovo podre)",CCl4:"tetracloreto de carbono",PH3:"fosfina",CS2:"dissulfeto de carbono",OF2:"difluoreto de oxigênio",NF3:"trifluoreto de nitrogênio",SiH4:"silano",BF3:"trifluoreto de boro",CF4:"tetrafluoreto de carbono",NCl3:"tricloreto de nitrogênio",PCl3:"tricloreto de fósforo",SiO2:"sílica (quartzo, areia)",H2Se:"seleneto de hidrogênio",ClF:"monofluoreto de cloro"};
+const ALLOY={"Cu-Zn":"latão: fechaduras, registros e instrumentos de sopro","Cu-Sn":"bronze: sinos, estátuas e buchas","Pb-Sn":"solda branca, usada em eletrônica antes das soldas sem chumbo","Fe-Ni":"invar: instrumentos de precisão que quase não dilatam","Cr-Fe":"base do aço inoxidável (com níquel e carbono)","Ag-Au":"ouro verde, liga natural de ouro e prata","Au-Cu":"ouro rosé e ouro 18 quilates (com prata)","Al-Mg":"magnálio: rodas e peças leves de aeronaves","Al-Cu":"duralumínio, usado na aviação","Cu-Ni":"cuproníquel: moedas e tubos de trocadores de calor","Ag-Hg":"amálgama dentária (com estanho e cobre)","Ni-Ti":"nitinol: fios ortodônticos com memória de forma","Nb-Ti":"fios supercondutores dos aparelhos de ressonância magnética","Fe-Mn":"aço-manganês, muito resistente ao desgaste (trilhos, britadores)","Al-Si":"liga de fundição de blocos de motor","Ag-Cu":"prata de lei (prata 925)"};
+const EXAMPLES=[[11,17],[12,8],[13,8],[20,17],[1,8],[6,8],[7,1],[17,17],[8,8],[7,7],[6,1],[29,30],[29,29],[26,26]];
+const OX_SPECIAL=new Set(["N","P","S","Se","Cl","Br","I","As","Te","At","Sb"]);
+const COL_A="var(--am)",COL_B="var(--mt)";
+
+function kindOf(z){const c=E[z-1][4];if(c==="gn")return"gn";if(c==="sm")return"sm";if(c==="nm"||c==="hal")return"nm";return"metal";}
+const valOf=z=>{const s=shellsOf(z);return s[s.length-1];};
+function needOf(z){const s=E[z-1][0],v=valOf(z);if(s==="H")return 1;if(s==="B")return 3;return 8-v;}
+function chargeOf(z){const e=E[z-1];if(e[4]==="am")return 1;if(e[4]==="ate")return 2;if(CHG[e[0]])return CHG[e[0]];if(e[4]==="lan"||e[4]==="act")return 3;return 2;}
+const nm=z=>E[z-1][1].toLowerCase();
+const de=z=>"de "+nm(z);
+const shellTxt=z=>shellsOf(z).map((c,i)=>SHELL[i]+" "+c).join(" · ");
+const ePl=n=>n+" elétron"+(n>1?"s":"");
+
+// ---- desenho de Lewis ----
+const SIDES=[[0,-1],[1,0],[0,1],[-1,0]];
+function lewis(x,y,sym,dots,opt={}){ // dots: array de cores
+  const r=opt.r||22;let h='<text x="'+x+'" y="'+(y+7)+'" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="'+(opt.fs||22)+'" font-weight="700" fill="var(--ink)">'+sym+'</text>';
+  const per=[[],[],[],[]];dots.forEach((c,i)=>per[i%4].push(c));
+  per.forEach((arr,s)=>{const [dx,dy]=SIDES[s];arr.forEach((c,k)=>{const off=arr.length===1?0:(k?5:-5);
+    const px=x+dx*r+(dy?off:0),py=y+dy*r+(dx?off:0);h+='<circle cx="'+px+'" cy="'+py+'" r="3.6" fill="'+c+'"/>';});});
+  return h;
+}
+function svgWrap(w,h,inner){return '<svg viewBox="0 0 '+w+' '+h+'" class="ldraw" role="img">'+inner+'</svg>';}
+function lab(x,y,t,c,fs){return '<text x="'+x+'" y="'+y+'" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="'+(fs||13)+'" fill="'+(c||"var(--muted)")+'">'+t+'</text>';}
+
+function covDraw(c,mode){ // c: {cen,lig,nl,order,colC,colL,vC,vL}
+  const D=92,top=c.nl===4?D:0,bot=c.nl>=3?D:0,W=360,H=top+bot+84,X=180,Y=42+top;
+  const dirsBy={1:[[1,0]],2:[[-1,0],[1,0]],3:[[-1,0],[1,0],[0,1]],4:[[-1,0],[1,0],[0,-1],[0,1]]};
+  const dirs=dirsBy[c.nl],cx=c.nl===1?X-D/2:X;let h="";
+  const pos=dirs.map(d=>[cx+d[0]*D,Y+d[1]*D]);
+  dirs.forEach((d,i)=>{const [lx,ly]=pos[i],px=-d[1],py=d[0];
+    for(let k=0;k<c.order;k++){const off=c.order===1?0:c.order===2?(k?6:-6):(k-1)*8;
+      if(mode==="lines"){h+='<line x1="'+(cx+d[0]*19+px*off)+'" y1="'+(Y+d[1]*19+py*off)+'" x2="'+(lx-d[0]*19+px*off)+'" y2="'+(ly-d[1]*19+py*off)+'" stroke="var(--ink)" stroke-width="2.2"/>';}
+      else{const mx=(cx+lx)/2+px*off*1.3,my=(Y+ly)/2+py*off*1.3;
+        h+='<circle cx="'+(mx-d[0]*5)+'" cy="'+(my-d[1]*5)+'" r="3.6" fill="'+c.colC+'"/><circle cx="'+(mx+d[0]*5)+'" cy="'+(my+d[1]*5)+'" r="3.6" fill="'+c.colL+'"/>';}
+    }});
+  const pairs=(x,y,n,used,col)=>{let s="";const free=SIDES.filter(sd=>!used.some(u=>u[0]===sd[0]&&u[1]===sd[1]));
+    free.sort((a,b)=>Math.abs(b[0])-Math.abs(a[0]));
+    for(let i=0;i<n&&i<free.length;i++){const [dx,dy]=free[i];for(const o of[-5,5])s+='<circle cx="'+(x+dx*22+(dy?o:0))+'" cy="'+(y+dy*22+(dx?o:0))+'" r="3.6" fill="'+col+'"/>';}return s;};
+  h+='<text x="'+cx+'" y="'+(Y+8)+'" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="22" font-weight="700" fill="var(--ink)">'+c.cen+'</text>';
+  h+=pairs(cx,Y,(c.vC-c.nl*c.order)/2,dirs,c.colC);
+  pos.forEach(([lx,ly],i)=>{const d=dirs[i];
+    h+='<text x="'+lx+'" y="'+(ly+8)+'" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="22" font-weight="700" fill="var(--ink)">'+c.lig+'</text>';
+    h+=pairs(lx,ly,(c.vL-c.order)/2,[[-d[0],-d[1]]],c.colL);});
+  return svgWrap(W,H,h);
+}
+
+function metalDraw(a,b){
+  const sa=E[a-1][0],sb=E[b-1][0],qa=Math.min(chargeOf(a),3),qb=Math.min(chargeOf(b),3);
+  const r=rng(a*17+b*31);let h="",cells=[];
+  for(let i=0;i<4;i++)for(let j=0;j<6;j++){const x=40+j*56+(i%2)*28,y=36+i*50,isB=a!==b&&(i+j)%2===1;cells.push([x,y,isB]);}
+  cells.forEach(([x,y,isB])=>{const col=isB?COL_B:COL_A;
+    h+='<circle cx="'+x+'" cy="'+y+'" r="17" fill="color-mix(in srgb,'+col+' 22%,var(--surface))" stroke="'+col+'" stroke-width="1.5"/>';
+    h+='<text x="'+x+'" y="'+(y+4)+'" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11" font-weight="700" fill="var(--ink)">'+(isB?sb:sa)+sup((isB?qb:qa)>1?(isB?qb:qa)+"+":"+")+'</text>';});
+  let ne=0;cells.forEach(c=>ne+=c[2]?qb:qa);ne=Math.min(ne,60);
+  for(let k=0;k<ne;k++){const x=14+r()*352,y=12+r()*180;let ok=cells.every(([cx,cy])=>Math.hypot(cx-x,cy-y)>21);if(!ok){k--;continue;}
+    h+='<circle class="sea" style="animation-delay:'+(-r()*4).toFixed(2)+'s" cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="3.4" fill="var(--accent)"/>';}
+  return svgWrap(380,205,h);
+}
+
+const lst={a:11,b:17,shown:1};
+
+function analyze(a,b){
+  const ka=kindOf(a),kb=kindOf(b),A=E[a-1],B=E[b-1];
+  if(a>103||b>103)return{type:"none",msg:"Elementos acima do Z = 103 duram frações de segundo e sua química ainda não foi estudada. Escolha outro par."};
+  if(ka==="gn"||kb==="gn"){const g=ka==="gn"?A:B,o=ka==="gn"?B:A;
+    return{type:"none",msg:"O "+g[1].toLowerCase()+" é um gás nobre: já tem a camada de valência completa e não precisa ganhar, perder nem compartilhar elétrons. Por isso praticamente não faz ligações."+((["Xe","Kr"].includes(g[0])&&o[0]==="F")?" Exceção: o "+g[1].toLowerCase()+" forma compostos com o flúor (ex.: "+g[0]+"F₂), mas eles fogem da regra do octeto.":"")};}
+  if(ka==="metal"&&kb==="metal")return{type:"met"};
+  if(ka==="metal"||kb==="metal"){const other=ka==="metal"?kb:ka;
+    if(other==="sm")return{type:"none",msg:"Metal com semimetal forma compostos de caráter misto, entre iônico e metálico (ex.: Mg₂Si). Escolha um não metal (O, Cl, S, N…) para ver uma ligação iônica típica."};
+    return{type:"ion"};}
+  return{type:"cov"};
+}
+
+function stepsIon(a0,b0){
+  const [a,b]=kindOf(a0)==="metal"?[a0,b0]:[b0,a0],A=E[a-1],B=E[b-1];
+  const q=chargeOf(a),vB=valOf(b),gq=needOf(b),va=valOf(a);
+  const g=gcd(q,gq),m=gq/g,n=q/g,f=A[0]+sub(m)+B[0]+sub(n),fk=A[0]+(m>1?m:"")+B[0]+(n>1?n:"");
+  const rom=(!FIXED.has(A[0])&&(A[4]==="mt"||A[4]==="act"||["Sn","Pb","Tl","Po"].includes(A[0])))?"("+ROM[q]+")":"";
+  const name=(ANION[B[0]]||"composto")+" de "+nm(a)+rom;
+  const cat=A[0]+sup((q>1?q:"")+"+"),an=B[0]+sup((gq>1?gq:"")+"-");
+  const steps=[];
+  steps.push(["Identifique o tipo de cada elemento","<p>O <b>"+nm(a)+"</b> é um metal ("+CAT[A[4]].toLowerCase()+") e o <b>"+nm(b)+"</b> é um não metal"+(B[0]==="H"?" (aqui o hidrogênio age como não metal)":"")+".</p><p>Metal + não metal → <b>ligação iônica</b>: um átomo doa elétrons e o outro recebe.</p>"]);
+  const tr=(A[4]==="mt"||A[4]==="act"||A[4]==="lan")&&!["Sc","Y"].includes(A[0]);
+  steps.push(["Olhe a camada de valência",
+    "<p>"+A[1]+": "+shellTxt(a)+" → "+(tr?"metal de transição; a carga mais comum é <b>+"+q+"</b>":"<b>"+ePl(va)+"</b> na camada de valência")+".<br>"+B[1]+": "+shellTxt(b)+" → <b>"+ePl(vB)+"</b> na camada de valência.</p>"+
+    svgWrap(360,90,lewis(110,45,A[0],Array(Math.min(q,8)).fill(COL_A))+lewis(250,45,B[0],Array(vB).fill(COL_B)))+'<p class="cap">Notação de Lewis: cada ponto é um elétron de valência.</p>']);
+  steps.push(["Quem perde e quem ganha elétrons",
+    "<p>O "+nm(a)+" <b>perde "+ePl(q)+"</b> e vira o cátion <b>"+cat+"</b>.<br>O "+nm(b)+" precisa de <b>"+ePl(gq)+"</b> para completar "+(B[0]==="H"?"2 elétrons (como o hélio)":"o octeto")+" e vira o ânion <b>"+an+"</b>.</p>"+
+    svgWrap(360,96,lewis(80,50,A[0],Array(Math.min(q,8)).fill(COL_A))+'<path d="M112 34 C170 -2 210 -2 262 30" fill="none" stroke="var(--am)" stroke-width="2" marker-end="url(#arL)"/><defs><marker id="arL" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--am)"/></marker></defs>'+lab(185,92,ePl(q)+" transferido"+(q>1?"s":""),"var(--am)",12)+lewis(280,50,B[0],Array(vB).fill(COL_B)))]);
+  steps.push(["Equilibre as cargas",
+    "<p>O composto precisa ser neutro: a soma das cargas positivas tem que igualar a das negativas.</p><p class=\"eqn\">"+m+" × (+"+q+") + "+n+" × (−"+gq+") = "+(m*q)+" − "+(n*gq)+" = 0</p><p>Regra prática: <b>cruze as cargas</b>. A carga do ânion ("+gq+") vira o índice do metal, e a do cátion ("+q+") vira o índice do não metal"+(g>1?"; depois simplifique (÷"+g+")":"")+".</p>"]);
+  const anDots=Array(vB).fill(COL_B).concat(Array(gq).fill(COL_A));
+  const drawIons=svgWrap(360,100,
+    (m>1?lab(40,58,String(m),"var(--ink)",20):"")+'<text x="62" y="58" font-family="IBM Plex Sans, sans-serif" font-size="34" fill="var(--muted)">[</text>'+lab(92,58,A[0],"var(--ink)",22)+'<text x="112" y="58" font-family="IBM Plex Sans, sans-serif" font-size="34" fill="var(--muted)">]</text>'+lab(130,34,(q>1?q:"")+"+","var(--proton)",16)+
+    (n>1?lab(178,58,String(n),"var(--ink)",20):"")+'<text x="196" y="62" font-family="IBM Plex Sans, sans-serif" font-size="44" fill="var(--muted)">[</text>'+lewis(240,48,B[0],anDots)+'<text x="272" y="62" font-family="IBM Plex Sans, sans-serif" font-size="44" fill="var(--muted)">]</text>'+lab(300,30,(gq>1?gq:"")+"−","var(--accent)",16));
+  steps.push(["Resultado",
+    '<p class="big">'+f+'</p><p><b>'+name.charAt(0).toUpperCase()+name.slice(1)+'</b>'+(NOTE_ION[fk]?": "+NOTE_ION[fk]:"")+'.</p>'+drawIons+
+    '<p class="cap">Pontos laranja: elétrons que vieram do '+nm(a)+'.</p><p>Os íons se atraem e formam um retículo cristalino. Compostos iônicos são sólidos, têm ponto de fusão alto e conduzem eletricidade quando fundidos ou dissolvidos em água.</p>'+
+    (tr?'<p class="cap">O '+nm(a)+' pode formar íons com outras cargas; aqui usamos a mais comum.</p>':"")]);
+  return steps;
+}
+
+function stepsCov(a,b){
+  const A=E[a-1],B=E[b-1],vA=valOf(a),vB=valOf(b),nA=needOf(a),nB=needOf(b);
+  const steps=[];
+  steps.push(["Identifique o tipo de cada elemento","<p>"+(a===b?"Os dois átomos são de <b>"+nm(a)+"</b>, um "+(A[4]==="sm"?"semimetal":"não metal")+".":"O <b>"+nm(a)+"</b> e o <b>"+nm(b)+"</b> são "+(A[4]==="sm"||B[4]==="sm"?"não metais ou semimetais":"não metais")+".")+"</p><p>Os dois querem <b>ganhar</b> elétrons e nenhum quer perder. A solução é <b>compartilhar pares de elétrons</b>: <b>ligação covalente</b>.</p>"]);
+  steps.push(["Olhe a camada de valência","<p>"+A[1]+": "+shellTxt(a)+" → <b>"+ePl(vA)+"</b>"+(a!==b?"<br>"+B[1]+": "+shellTxt(b)+" → <b>"+ePl(vB)+"</b>":"")+"</p>"+
+    svgWrap(360,90,lewis(a===b?120:110,45,A[0],Array(vA).fill(COL_A))+lewis(a===b?240:250,45,B[0],Array(vB).fill(COL_B)))]);
+  const fz=s=>s==="H"?"2 (como o hélio)":"8 (octeto)";
+  steps.push(["Quantas ligações cada um faz","<p>Cada par compartilhado conta 1 elétron a mais para cada átomo.</p><p>"+A[1]+": tem "+vA+", quer "+fz(A[0])+" → faz <b>"+nA+" ligaç"+(nA>1?"ões":"ão")+"</b>."+(a!==b?"<br>"+B[1]+": tem "+vB+", quer "+fz(B[0])+" → faz <b>"+nB+" ligaç"+(nB>1?"ões":"ão")+"</b>.":"")+"</p>"+(A[0]==="B"||B[0]==="B"?'<p class="cap">O boro é exceção: faz só 3 ligações e fica com 6 elétrons.</p>':"")]);
+  // casos especiais
+  const special=(why)=>{steps.push(["Por que este caso é diferente","<p>"+why+"</p>"]);return steps;};
+  if(a===b){
+    if(!["H","N","O","F","Cl","Br","I","At"].includes(A[0]))
+      return special(A[0]==="C"?"O carbono faz 4 ligações e não cabem 4 ligações entre só dois átomos. Os átomos de carbono se unem em <b>redes gigantes</b>: no diamante, cada C se liga a outros 4; no grafite, forma camadas.":"O "+nm(a)+" não forma moléculas de 2 átomos estáveis. Os átomos se unem em anéis, cadeias ou redes (ex.: S₈ no enxofre, P₄ no fósforo branco, rede cristalina no silício).");
+  }
+  if(a!==b&&((A[0]==="O"&&OX_SPECIAL.has(B[0]))||(B[0]==="O"&&OX_SPECIAL.has(A[0]))))
+    return special("Os óxidos de nitrogênio, fósforo, enxofre e halogênios não seguem a regra simples do octeto: o átomo central pode usar mais elétrons (ex.: NO₂, SO₂, SO₃, P₄O₁₀, Cl₂O). Experimente O com H, C ou F.");
+  let x,y;if(a===b){x=2;y=0;}else{const g=gcd(nA,nB);x=nB/g;y=nA/g;}
+  if(a!==b&&x>1&&y>1){
+    const ff=(ORDER_F.indexOf(A[0])<=ORDER_F.indexOf(B[0]))?A[0]+sub(x)+B[0]+sub(y):B[0]+sub(y)+A[0]+sub(x);
+    steps.push(["Monte a fórmula","<p>Para todos completarem a camada: "+x+" × "+nA+" = "+y+" × "+nB+" ligações. Fórmula prevista: <b>"+ff+"</b>.</p><p>Com vários átomos de cada tipo, a estrutura forma uma rede ou cadeia mais complexa, que não cabe em um desenho simples.</p>"]);return steps;}
+  // estrutura com átomo central
+  let cen,lig,nl,order,colC,colL,vC,vL;
+  if(a===b){cen=A[0];lig=A[0];nl=1;order=nA;colC=COL_A;colL=COL_B;vC=vA;vL=vA;}
+  else if(x===1&&y===1){[cen,lig,colC,colL,vC,vL]=ORDER_F.indexOf(A[0])<=ORDER_F.indexOf(B[0])?[A[0],B[0],COL_A,COL_B,vA,vB]:[B[0],A[0],COL_B,COL_A,vB,vA];nl=1;order=nA;}
+  else if(x===1){cen=A[0];lig=B[0];nl=y;order=nB;colC=COL_A;colL=COL_B;vC=vA;vL=vB;}
+  else{cen=B[0];lig=A[0];nl=x;order=nA;colC=COL_B;colL=COL_A;vC=vB;vL=vA;}
+  let f;
+  if(a===b)f=A[0]+"₂";
+  else{const cnt={[A[0]]:x,[B[0]]:y};const ord=[A[0],B[0]].sort((p,q)=>ORDER_F.indexOf(p)-ORDER_F.indexOf(q));f=ord.map(s=>s+sub(cnt[s])).join("");}
+  const fk=f.replace(/[₀-₉]/g,c=>"0123456789"["₀₁₂₃₄₅₆₇₈₉".indexOf(c)]);
+  const tipoL=order===1?"simples":order===2?"dupla":"tripla";
+  steps.push(["Monte a fórmula",
+    "<p>"+(a===b?"Dois átomos de "+nm(a)+" compartilham "+order+" par"+(order>1?"es":"")+" de elétrons entre si.":(nl>1?"O "+(cen===A[0]?nm(a):nm(b))+" fica no centro e se liga a "+nl+" átomos de "+(lig===A[0]?nm(a):nm(b))+".":"Um átomo de cada se liga compartilhando "+order+" par"+(order>1?"es":"")+"."))+"</p><p>Fórmula: <b>"+f+"</b></p>"+
+    covDraw({cen,lig,nl,order,colC,colL,vC,vL},"dots")+'<p class="cap">Entre os átomos, cada par compartilhado tem um elétron de cada átomo (laranja e azul).</p>']);
+  const nm2=NAME_COV[fk]||(A[0]==="Si"&&B[0]==="O"||A[0]==="O"&&B[0]==="Si"?NAME_COV.SiO2:"");
+  steps.push(["Resultado",
+    '<p class="big">'+f+'</p>'+(nm2?"<p><b>"+nm2.charAt(0).toUpperCase()+nm2.slice(1)+"</b></p>":"")+
+    covDraw({cen,lig,nl,order,colC,colL,vC,vL},"lines")+
+    '<p class="cap">Fórmula estrutural: cada traço é um par compartilhado (ligação '+tipoL+'). Os pontos são pares que não participam da ligação.</p>'+
+    "<p>Confira: "+[[cen,vC,nl*order],[lig,vL,order]].map(([s,v,bd])=>s+" fica com "+(v+bd)+" elétrons").filter((t,i)=>!(a===b&&i)).join(", ")+".</p>"+
+    ((fk==="SiO2")?'<p class="cap">Na sílica real, cada O liga dois Si com ligações simples, formando uma rede gigante (quartzo).</p>':"")+
+    ((fk==="H2O")?'<p class="cap">No espaço, a molécula de água é angular (cerca de 104,5°) por causa dos pares livres do oxigênio.</p>':"")+
+    "<p>Substâncias covalentes moleculares costumam ter ponto de fusão baixo e não conduzem eletricidade.</p>"]);
+  return steps;
+}
+
+function stepsMet(a,b){
+  const A=E[a-1],B=E[b-1],same=a===b,key=[A[0],B[0]].sort().join("-");
+  const steps=[];
+  steps.push(["Identifique o tipo de cada elemento","<p>"+(same?"Os átomos são todos de <b>"+nm(a)+"</b>, um metal.":"O <b>"+nm(a)+"</b> e o <b>"+nm(b)+"</b> são metais.")+"</p><p>Metal + metal → <b>ligação metálica</b>. Nenhum dos dois quer ganhar elétrons; os dois perdem com facilidade.</p>"]);
+  steps.push(["Olhe a camada de valência","<p>"+A[1]+": "+shellTxt(a)+" → "+ePl(valOf(a))+" na camada de valência."+(same?"":"<br>"+B[1]+": "+shellTxt(b)+" → "+ePl(valOf(b))+" na camada de valência.")+"</p><p>São poucos elétrons e ficam longe do núcleo, presos com pouca força.</p>"]);
+  steps.push(["Os átomos soltam seus elétrons","<p>Cada átomo libera os elétrons de valência e vira um <b>cátion</b>. Os cátions ficam arrumados em um retículo, como bolinhas empilhadas.</p>"]);
+  steps.push(["O mar de elétrons","<p>Os elétrons soltos não pertencem a nenhum átomo: circulam livres entre os cátions e os mantêm unidos. É o <b>mar de elétrons</b>.</p>"+metalDraw(a,b)+'<p class="cap">Círculos: cátions do metal. Pontos azuis: elétrons livres.</p>']);
+  steps.push(["Resultado","<p class=\"big\">"+(same?A[0]+" (metal sólido)":"Liga "+A[0]+"–"+B[0])+"</p><p>"+(same?"É o próprio metal puro: fios, chapas e barras de "+nm(a)+".":(ALLOY[key]?"<b>"+ALLOY[key].charAt(0).toUpperCase()+ALLOY[key].slice(1)+"</b>.":"Uma mistura de metais assim é chamada de <b>liga metálica</b>."))+"</p><p>O mar de elétrons explica as propriedades dos metais: <b>conduzem</b> eletricidade e calor, têm <b>brilho</b> e são <b>maleáveis</b> (podem virar chapas e fios sem quebrar).</p>"]);
+  return steps;
+}
+
+function renderLig(){
+  const a=lst.a,b=lst.b,an=analyze(a,b),box=$("ligSteps");
+  $("selA").value=a;$("selB").value=b;
+  const tag={ion:["Ligação iônica","var(--proton)"],cov:["Ligação covalente","var(--accent)"],met:["Ligação metálica","var(--ate)"],none:["Sem ligação típica","var(--muted)"]}[an.type];
+  $("ligType").textContent=tag[0];$("ligType").style.setProperty("--c",tag[1]);
+  $("ligPair").textContent=E[a-1][1]+" + "+E[b-1][1];
+  if(an.type==="none"){box.innerHTML='<div class="lstep"><p>'+an.msg+'</p></div>';$("ligNav").hidden=true;return;}
+  const steps=an.type==="ion"?stepsIon(a,b):an.type==="cov"?stepsCov(a,b):stepsMet(a,b);
+  lst.shown=Math.min(Math.max(1,lst.shown),steps.length);
+  box.innerHTML=steps.map((s,i)=>'<div class="lstep"'+(i<lst.shown?"":" hidden")+'><div class="sn">'+(i+1)+'</div><div class="sb"><h3>'+s[0]+'</h3>'+s[1]+'</div></div>').join("");
+  $("ligNav").hidden=false;
+  $("ligCount").textContent="Passo "+lst.shown+" de "+steps.length;
+  $("ligPrev").disabled=lst.shown<=1;$("ligNext").disabled=lst.shown>=steps.length;$("ligAll").disabled=lst.shown>=steps.length;
+  lst.total=steps.length;
+}
+
+(function buildLig(){
+  const opts=E.map((e,i)=>'<option value="'+(i+1)+'">'+(i+1)+' · '+e[0]+' · '+e[1]+'</option>').join("");
+  $("selA").innerHTML=opts;$("selB").innerHTML=opts;
+  $("selA").onchange=()=>{lst.a=+$("selA").value;lst.shown=1;renderLig();};
+  $("selB").onchange=()=>{lst.b=+$("selB").value;lst.shown=1;renderLig();};
+  $("ligSwap").onclick=()=>{[lst.a,lst.b]=[lst.b,lst.a];lst.shown=1;renderLig();};
+  $("ligEx").innerHTML=EXAMPLES.map(([p,q])=>'<button class="chip-b" data-a="'+p+'" data-b="'+q+'">'+(p===q?E[p-1][0]+" + "+E[q-1][0]:E[p-1][0]+" + "+E[q-1][0])+'</button>').join("");
+  $("ligEx").onclick=ev=>{const t=ev.target.closest("button");if(!t)return;lst.a=+t.dataset.a;lst.b=+t.dataset.b;lst.shown=1;renderLig();};
+  $("ligNext").onclick=()=>{lst.shown++;renderLig();const s=$("ligSteps").querySelectorAll(".lstep")[lst.shown-1];if(s)s.scrollIntoView({behavior:"smooth",block:"nearest"});};
+  $("ligPrev").onclick=()=>{lst.shown--;renderLig();};
+  $("ligAll").onclick=()=>{lst.shown=99;renderLig();};
+  renderLig();
+  const tabs=document.querySelectorAll(".mtab");
+  function setMod(m){tabs.forEach(t=>{const on=t.dataset.m===m;t.setAttribute("aria-selected",on);});$("modEl").hidden=m!=="el";$("modLig").hidden=m!=="lig";}
+  tabs.forEach(t=>t.onclick=()=>setMod(t.dataset.m));
+  if(location.hash==="#ligacoes")setMod("lig");
+})();
+
+// ---------- tema (claro por padrão) ----------
+(function(){
+  const root=document.documentElement,btn=$("tema");
+  function set(d){root.classList.toggle("escuro",d);btn.textContent=d?"Modo claro":"Modo escuro";btn.setAttribute("aria-pressed",d);try{localStorage.setItem("quimicar-tema",d?"escuro":"claro");}catch(e){}}
+  let d=false;try{d=localStorage.getItem("quimicar-tema")==="escuro";}catch(e){}
+  set(d);btn.onclick=()=>set(!root.classList.contains("escuro"));
+})();
+</script>
+</html>
